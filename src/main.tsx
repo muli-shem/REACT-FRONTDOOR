@@ -11,6 +11,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
+        <App />
         <Toaster position="top-right" 
         toastOptions={{
           duration: 4000,
@@ -33,9 +34,7 @@ createRoot(document.getElementById('root')!).render(
           },
         }} 
         />
-        <App />
       </BrowserRouter>
     </Provider>
-    <App />
   </StrictMode>,
 )

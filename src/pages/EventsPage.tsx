@@ -1,0 +1,209 @@
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { fetchEvents } from '@/redux/slices/orgSlice';
+import { Calendar, Clock, MapPin, User, AlertCircle } from 'lucide-react';
+
+const EventsPage = () => {
+  const dispatch = useAppDispatch();
+  const { events, loading, error } = useAppSelector(state => state.org);
+
+  useEffect(() => {
+    dispatch(fetchEvents());
+  }, [dispatch]);
+
+  // Separate upcoming and past events
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset to start of day
+
+  const upcomingEvents = events.filter(event => {
+    const eventDate = new Date(event.event_date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  }).sort((a, b) => 
+    new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+  );
+
+  const pastEvents = events.filter(event => {
+    const eventDate = new Date(event.event_date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate < today;
+  }).sort((a, b) => 
+    new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 mb-2">Failed to load events</p>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={() => dispatch(fetchEvents())}
+            className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const EventCard = ({ event, isPast = false }: { event: any; isPast?: boolean }) => {
+    const eventDate = new Date(event.event_date);
+    const isToday = eventDate.toDateString() === today.toDateString();
+
+    return (
+      <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition ${
+        isPast ? 'opacity-75' : ''
+      }`}>
+        {/* Date Badge */}
+        <div className="flex items-start gap-6 mb-4">
+          <div className={`flex-shrink-0 w-16 h-16 rounded-lg flex flex-col items-center justify-center ${
+            isToday ? 'bg-secondary text-primary' :
+            isPast ? 'bg-gray-200 text-gray-600' :
+            'bg-primary text-white'
+          }`}>
+            <span className="text-xs font-semibold uppercase">
+              {eventDate.toLocaleDateString('en-US', { month: 'short' })}
+            </span>
+            <span className="text-2xl font-bold">
+              {eventDate.getDate()}
+            </span>
+          </div>
+
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-xl font-bold text-gray-900 flex-1">
+                {event.title}
+              </h3>
+              {isToday && (
+                <span className="px-3 py-1 bg-secondary text-primary text-xs font-bold rounded-full">
+                  TODAY
+                </span>
+              )}
+              {isPast && (
+                <span className="px-3 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-full">
+                  PAST
+                </span>
+              )}
+            </div>
+
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              {event.description}
+            </p>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <Calendar className="w-4 h-4" />
+                <span className="font-semibold">
+                  {eventDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span className="font-semibold">{event.event_time}</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span className="font-semibold">{event.location}</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>Organized by {event.created_by}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {!isPast && (
+          <div className="pt-4 border-t border-gray-200">
+            <button className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-lg transition">
+              RSVP / Mark Attendance
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+          <p className="text-gray-600 mt-1">
+            Stay connected with G-NET community events and activities
+          </p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg">
+          <Calendar className="w-5 h-5 text-primary" />
+          <span className="font-bold text-primary">{events.length}</span>
+        </div>
+      </div>
+
+      {/* Upcoming Events */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-8 bg-primary rounded"></span>
+          Upcoming Events
+          <span className="text-lg font-normal text-gray-500">
+            ({upcomingEvents.length})
+          </span>
+        </h2>
+
+        {upcomingEvents.length > 0 ? (
+          <div className="space-y-4">
+            {upcomingEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No upcoming events</h3>
+            <p className="text-gray-600">Check back soon for new events!</p>
+          </div>
+        )}
+      </div>
+
+      {/* Past Events */}
+      {pastEvents.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="w-2 h-8 bg-gray-400 rounded"></span>
+            Past Events
+            <span className="text-lg font-normal text-gray-500">
+              ({pastEvents.length})
+            </span>
+          </h2>
+
+          <div className="space-y-4">
+            {pastEvents.map(event => (
+              <EventCard key={event.id} event={event} isPast={true} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default EventsPage;

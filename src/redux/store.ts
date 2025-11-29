@@ -1,17 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
-// import authReducer from './slices/authSlice';
-// import membersReducer from './slices/membersSlice';
-// import financeReducer from './slices/financeSlice';
-// import projectsReducer from './slices/projectsSlice';
-// import orgReducer from './slices/orgSlice';
+import authReducer from './slices/authSlice';
+import membersReducer from './slices/membersSlice';
+import financeReducer from './slices/financesSlice';
+import projectsReducer from './slices/projectsSlice';
+import orgReducer from './slices/orgSlice';
 
 export const store = configureStore({
   reducer: {
-//     auth: authReducer,
-//     members: membersReducer,
-//     finance: financeReducer,
-//     projects: projectsReducer,
-//     org: orgReducer,
+    auth: authReducer,
+    members: membersReducer,
+    finance: financeReducer,
+    projects: projectsReducer,
+    org: orgReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

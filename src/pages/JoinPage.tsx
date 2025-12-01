@@ -1,24 +1,28 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { submitJoinApplication } from '@/redux/slices/orgSlice';
+import { submitJoinApplication } from '@/redux/slices/membersSlice';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react';
 
 const JoinPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector(state => state.org);
+  const { loading, error } = useAppSelector(state => state.members);
 
   const [formData, setFormData] = useState({
-    full_name: '',
+    firstName: '',
+    lastName: '',
     email: '',
+    phone: '',
     county: '',
-    phone_number: '',
-    motivation: ''
+    profession: '',
+    skills: '',
+    motivation: '',
+    portfolioUrl: ''
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -29,23 +33,33 @@ const JoinPage = () => {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.full_name || !formData.email || !formData.county || !formData.motivation) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.county || !formData.profession || !formData.motivation) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Validate phone number if provided
+    if (formData.phone && !formData.phone.match(/^[+]?[\d\s()-]+$/)) {
+      toast.error('Please enter a valid phone number');
       return;
     }
 
     const result = await dispatch(submitJoinApplication(formData));
 
     if (submitJoinApplication.fulfilled.match(result)) {
-      toast.success('Application submitted successfully! We will review and contact you soon.');
+      toast.success('Application submitted successfully! Check your email for next steps.');
       
       // Reset form
       setFormData({
-        full_name: '',
+        firstName: '',
+        lastName: '',
         email: '',
+        phone: '',
         county: '',
-        phone_number: '',
-        motivation: ''
+        profession: '',
+        skills: '',
+        motivation: '',
+        portfolioUrl: ''
       });
 
       // Redirect to landing page after 2 seconds
@@ -119,21 +133,39 @@ const JoinPage = () => {
           <h2 className="text-2xl font-bold text-primary mb-6">Application Form</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name */}
-            <div>
-              <label htmlFor="full_name" className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                id="full_name"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="Enter your full name"
-              />
+            {/* First Name and Last Name */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                  placeholder="Enter your first name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                  placeholder="Enter your last name"
+                />
+              </div>
             </div>
 
             {/* Email */}
@@ -153,6 +185,22 @@ const JoinPage = () => {
               />
             </div>
 
+            {/* Phone Number */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+                Phone Number (Optional)
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                placeholder="+254 700 000 000"
+              />
+            </div>
+
             {/* County */}
             <div>
               <label htmlFor="county" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -162,7 +210,7 @@ const JoinPage = () => {
                 id="county"
                 name="county"
                 value={formData.county}
-                onChange={handleChange as any}
+                onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition bg-white"
               >
@@ -175,19 +223,55 @@ const JoinPage = () => {
               </select>
             </div>
 
-            {/* Phone Number */}
+            {/* Profession */}
             <div>
-              <label htmlFor="phone_number" className="block text-sm font-semibold text-gray-700 mb-2">
-                Phone Number (Optional)
+              <label htmlFor="profession" className="block text-sm font-semibold text-gray-700 mb-2">
+                Profession *
               </label>
               <input
-                type="tel"
-                id="phone_number"
-                name="phone_number"
-                value={formData.phone_number}
+                type="text"
+                id="profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                placeholder="e.g., Software Developer, Entrepreneur, Student"
+              />
+            </div>
+
+            {/* Skills */}
+            <div>
+              <label htmlFor="skills" className="block text-sm font-semibold text-gray-700 mb-2">
+                Skills (Optional)
+              </label>
+              <input
+                type="text"
+                id="skills"
+                name="skills"
+                value={formData.skills}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="+254 700 000 000"
+                placeholder="e.g., Leadership, Coding, Marketing (comma-separated)"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                List your key skills separated by commas
+              </p>
+            </div>
+
+            {/* Portfolio URL */}
+            <div>
+              <label htmlFor="portfolioUrl" className="block text-sm font-semibold text-gray-700 mb-2">
+                Portfolio URL (Optional)
+              </label>
+              <input
+                type="url"
+                id="portfolioUrl"
+                name="portfolioUrl"
+                value={formData.portfolioUrl}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                placeholder="https://yourportfolio.com"
               />
             </div>
 
@@ -207,7 +291,7 @@ const JoinPage = () => {
                 placeholder="Tell us about your goals, interests, and what you hope to contribute to the community..."
               />
               <p className="text-sm text-gray-500 mt-2">
-                Minimum 50 characters. Be specific about your entrepreneurial goals and vision.
+                Be specific about your entrepreneurial goals and vision.
               </p>
             </div>
 
@@ -254,9 +338,9 @@ const JoinPage = () => {
           <h3 className="text-xl font-bold text-primary mb-4">What to Expect After Applying</h3>
           <div className="space-y-3">
             {[
-              'Our team will review your application within 3-5 business days',
-              'You may be invited for an interview or orientation session',
-              'Once approved, you\'ll receive login credentials and onboarding materials',
+              'Your account will be created and you\'ll receive a welcome email',
+              'Check your email for instructions to set your password',
+              'Once your password is set, you can log in and access all member benefits',
               'Welcome to the G-NET community of young entrepreneurs!'
             ].map((step, idx) => (
               <div key={idx} className="flex items-start gap-3">

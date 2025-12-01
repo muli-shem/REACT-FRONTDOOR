@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/services/api';
-import {type  MembersState,type Member } from '@/types';
+import { type MembersState, type Member, type JoinApplicationData } from '@/types';
 
 // Initial state
 const initialState: MembersState = {
@@ -56,6 +56,24 @@ export const fetchMemberCount = createAsyncThunk<number>(
   }
 );
 
+// Async thunk to submit join application
+export const submitJoinApplication = createAsyncThunk <
+  { detail: string; user?: any },
+  JoinApplicationData
+>(
+  'members/join',
+  async (applicationData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/members/join/', applicationData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || 'Failed to submit application'
+      );
+    }
+  }
+);
+
 // Create the slice
 const membersSlice = createSlice({
   name: 'members',
@@ -103,6 +121,19 @@ const membersSlice = createSlice({
     // FETCH MEMBER COUNT
     builder.addCase(fetchMemberCount.fulfilled, (state, action) => {
       state.totalCount = action.payload;
+    });
+
+    // SUBMIT JOIN APPLICATION
+    builder.addCase(submitJoinApplication.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(submitJoinApplication.fulfilled, (state) => {
+      state.loading = false;
+    });
+    builder.addCase(submitJoinApplication.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
     });
   },
 });

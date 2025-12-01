@@ -155,11 +155,15 @@ export interface OrgState {
 
 // Join Application Types
 export interface JoinApplicationData {
-  full_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  phone?: string;
   county: string;
+  profession: string;
+  skills?: string;
   motivation: string;
-  phone_number?: string;
+  portfolioUrl?: string;
 }
 
 // API Response Types

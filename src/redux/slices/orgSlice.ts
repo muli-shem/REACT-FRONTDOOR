@@ -70,23 +70,7 @@ export const fetchNextEvent = createAsyncThunk<Event>(
   }
 );
 
-// Async thunk to submit join application
-export const submitJoinApplication = createAsyncThunk
- < { message: string },
-  { full_name: string; email: string; county: string; motivation: string; phone_number?: string }
->(
-  'org/submitJoinApplication',
-  async (applicationData, { rejectWithValue }) => {
-    try {
-      const response = await api.post('/org/join/', applicationData);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Failed to submit application'
-      );
-    }
-  }
-);
+
 
 // Create the slice
 const orgSlice = createSlice({
@@ -146,18 +130,7 @@ const orgSlice = createSlice({
       }
     });
 
-    // SUBMIT JOIN APPLICATION
-    builder.addCase(submitJoinApplication.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(submitJoinApplication.fulfilled, (state) => {
-      state.loading = false;
-    });
-    builder.addCase(submitJoinApplication.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload as string;
-    });
+   
   },
 });
 

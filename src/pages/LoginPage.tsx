@@ -152,16 +152,20 @@ const LoginPage = () => {
                 )}
               </button>
             </form>
-
             {/* Links */}
-            <div className="mt-6 text-center space-y-3">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/join" className="text-primary font-semibold hover:text-primary-dark">
-                  Apply to join
-                </Link>
-              </p>
-            </div>
+          <div className="mt-6 text-center space-y-3">
+            <p className="text-sm text-gray-600">
+    Don't have an account?{' '}
+    <Link to="/join" className="text-primary font-semibold hover:text-primary-dark">
+      Apply to join
+    </Link>
+  </p>
+  <p className="text-sm text-gray-600">
+    <Link to="/forgot-password" className="text-primary font-semibold hover:text-primary-dark">
+      Forgot password?
+    </Link>
+  </p>
+</div>
           </div>
         </div>
       </div>

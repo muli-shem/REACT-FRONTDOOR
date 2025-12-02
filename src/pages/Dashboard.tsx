@@ -123,7 +123,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5" />
                   <span className="font-semibold">
-                    {new Date(nextEvent.event_date).toLocaleDateString('en-US', {
+                    {new Date(nextEvent.date).toLocaleDateString('en-US', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',

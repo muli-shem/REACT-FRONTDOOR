@@ -140,10 +140,11 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  event_date: string;
+  date: string;
   event_time: string;
   created_by: string;
   created_at: string;
+  
 }
 
 export interface OrgState {

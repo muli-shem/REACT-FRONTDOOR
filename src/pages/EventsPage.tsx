@@ -16,19 +16,19 @@ const EventsPage = () => {
   today.setHours(0, 0, 0, 0); // Reset to start of day
 
   const upcomingEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date);
+    const eventDate = new Date(event.date);
     eventDate.setHours(0, 0, 0, 0);
     return eventDate >= today;
   }).sort((a, b) => 
-    new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
   const pastEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date);
+    const eventDate = new Date(event.date);
     eventDate.setHours(0, 0, 0, 0);
     return eventDate < today;
   }).sort((a, b) => 
-    new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
+    new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
   if (loading) {

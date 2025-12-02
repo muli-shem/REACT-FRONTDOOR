@@ -35,7 +35,19 @@ const Dashboard = () => {
     dispatch(fetchNextEvent());
   }, [dispatch]);
 
-  const nextEvent = events[0]; // First event is the next one
+  // Get the next upcoming event (safely filter and sort)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const nextEvent = events
+    .filter(event => {
+      if (!event.event_date) return false;
+      const eventDate = new Date(event.event_date);
+      return !isNaN(eventDate.getTime()) && eventDate >= today;
+    })
+    .sort((a, b) => 
+      new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+    )[0];
 
   return (
     <div className="space-y-6">
@@ -116,29 +128,35 @@ const Dashboard = () => {
           
           {nextEvent ? (
             <div>
-              <h3 className="text-2xl font-bold mb-3">{nextEvent.title}</h3>
-              <p className="mb-6 opacity-90">{nextEvent.description}</p>
+              <h3 className="text-2xl font-bold mb-3">{nextEvent.title || 'Untitled Event'}</h3>
+              <p className="mb-6 opacity-90">{nextEvent.description || 'No description available'}</p>
               
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5" />
-                  <span className="font-semibold">
-                    {new Date(nextEvent.date).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5" />
-                  <span className="font-semibold">{nextEvent.event_time}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5" />
-                  <span className="font-semibold">{nextEvent.location}</span>
-                </div>
+                {nextEvent.event_date && (
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5" />
+                    <span className="font-semibold">
+                      {new Date(nextEvent.event_date).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                )}
+                {nextEvent.event_time && (
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5" />
+                    <span className="font-semibold">{nextEvent.event_time}</span>
+                  </div>
+                )}
+                {nextEvent.location && (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5" />
+                    <span className="font-semibold">{nextEvent.location}</span>
+                  </div>
+                )}
               </div>
 
               <Link
@@ -152,6 +170,12 @@ const Dashboard = () => {
             <div className="text-center py-8">
               <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p className="opacity-75">No upcoming events</p>
+              <Link
+                to="/events"
+                className="inline-block mt-4 text-primary hover:text-primary-dark font-semibold text-sm"
+              >
+                View All Events →
+              </Link>
             </div>
           )}
         </div>

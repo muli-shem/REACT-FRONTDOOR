@@ -16,19 +16,19 @@ const EventsPage = () => {
   today.setHours(0, 0, 0, 0); // Reset to start of day
 
   const upcomingEvents = events.filter(event => {
-    const eventDate = new Date(event.date);
+    const eventDate = new Date(event.event_date);
     eventDate.setHours(0, 0, 0, 0);
     return eventDate >= today;
   }).sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
   );
 
   const pastEvents = events.filter(event => {
-    const eventDate = new Date(event.date);
+    const eventDate = new Date(event.event_date);
     eventDate.setHours(0, 0, 0, 0);
     return eventDate < today;
   }).sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+    new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
   );
 
   if (loading) {
@@ -61,8 +61,16 @@ const EventsPage = () => {
   }
 
   const EventCard = ({ event, isPast = false }: { event: any; isPast?: boolean }) => {
-    const eventDate = new Date(event.event_date);
-    const isToday = eventDate.toDateString() === today.toDateString();
+    // Safely parse the date
+    const eventDate = event.event_date ? new Date(event.event_date) : new Date();
+    const isValidDate = !isNaN(eventDate.getTime());
+    const isToday = isValidDate && eventDate.toDateString() === today.toDateString();
+
+    // If date is invalid, don't render the card
+    if (!isValidDate) {
+      console.error('Invalid event date:', event);
+      return null;
+    }
 
     return (
       <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition ${
@@ -86,7 +94,7 @@ const EventsPage = () => {
           <div className="flex-1">
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-xl font-bold text-gray-900 flex-1">
-                {event.title}
+                {event.title || 'Untitled Event'}
               </h3>
               {isToday && (
                 <span className="px-3 py-1 bg-secondary text-primary text-xs font-bold rounded-full">
@@ -101,7 +109,7 @@ const EventsPage = () => {
             </div>
 
             <p className="text-gray-700 mb-4 leading-relaxed">
-              {event.description}
+              {event.description || 'No description available'}
             </p>
 
             <div className="space-y-2">
@@ -116,18 +124,24 @@ const EventsPage = () => {
                   })}
                 </span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span className="font-semibold">{event.event_time}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <MapPin className="w-4 h-4" />
-                <span className="font-semibold">{event.location}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span>Organized by {event.created_by}</span>
-              </div>
+              {event.event_time && (
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-semibold">{event.event_time}</span>
+                </div>
+              )}
+              {event.location && (
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <MapPin className="w-4 h-4" />
+                  <span className="font-semibold">{event.location}</span>
+                </div>
+              )}
+              {event.created_by && (
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <User className="w-4 h-4" />
+                  <span>Organized by {event.created_by}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

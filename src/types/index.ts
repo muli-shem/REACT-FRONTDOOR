@@ -140,7 +140,7 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  date: string;
+  event_date: string;
   event_time: string;
   created_by: string;
   created_at: string;

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/services/api';
-import {type  OrgState, type Announcement,type Event } from '@/types';
+import { type OrgState, type Announcement, type Event } from '@/types';
 
 // Initial state
 const initialState: OrgState = {
@@ -48,6 +48,10 @@ export const fetchEvents = createAsyncThunk<Event[]>(
       const response = await api.get('/org/events/');
       return response.data;
     } catch (error: any) {
+      // Handle 404 gracefully - empty events is not an error
+      if (error.response?.status === 404) {
+        return [];
+      }
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch events'
       );
@@ -56,21 +60,24 @@ export const fetchEvents = createAsyncThunk<Event[]>(
 );
 
 // Async thunk to fetch next upcoming event (for dashboard)
-export const fetchNextEvent = createAsyncThunk<Event>(
+export const fetchNextEvent = createAsyncThunk<Event | null>(
   'org/fetchNextEvent',
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/org/events/next/');
       return response.data;
     } catch (error: any) {
+      // 404 means no upcoming events - this is NOT an error, return null
+      if (error.response?.status === 404) {
+        return null;
+      }
+      // Other errors should be rejected
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch next event'
       );
     }
   }
 );
-
-
 
 // Create the slice
 const orgSlice = createSlice({
@@ -122,15 +129,24 @@ const orgSlice = createSlice({
     });
 
     // FETCH NEXT EVENT
-    builder.addCase(fetchNextEvent.fulfilled, (state, action) => {
-      // Add to events array if not already present
-      const exists = state.events.some(e => e.id === action.payload.id);
-      if (!exists) {
-        state.events = [action.payload, ...state.events];
-      }
+    builder.addCase(fetchNextEvent.pending, (state) => {
+      state.loading = true;
     });
-
-   
+    builder.addCase(fetchNextEvent.fulfilled, (state, action) => {
+      state.loading = false;
+      // If we got a valid event (not null), add it to the events array
+      if (action.payload) {
+        const exists = state.events.some(e => e.id === action.payload!.id);
+        if (!exists) {
+          state.events = [action.payload, ...state.events];
+        }
+      }
+      // If payload is null, it means no upcoming events - this is fine, not an error
+    });
+    builder.addCase(fetchNextEvent.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
   },
 });
 

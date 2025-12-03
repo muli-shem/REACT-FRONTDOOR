@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {type TopUp } from '@/types';
+import { type TopUp } from '@/types';
 import { FileText, Calendar } from 'lucide-react';
 
 interface TransactionHistoryProps {
@@ -15,23 +15,23 @@ const TransactionHistory = ({ topups }: TransactionHistoryProps) => {
     return topup.status === statusFilter;
   });
 
-  // Status badge styling
+  // Status badge styling - ✅ Updated to match backend status values
   const getStatusBadge = (status: string) => {
     const styles = {
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      approved: 'bg-green-100 text-green-800 border-green-200',
-      rejected: 'bg-red-100 text-red-800 border-red-200'
+      Pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      Success: 'bg-green-100 text-green-800 border-green-200',
+      Failed: 'bg-red-100 text-red-800 border-red-200'
     };
 
     const labels = {
-      pending: 'Pending',
-      approved: 'Approved',
-      rejected: 'Rejected'
+      Pending: 'Pending',
+      Success: 'Approved',
+      Failed: 'Rejected'
     };
 
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+        {labels[status as keyof typeof labels] || status}
       </span>
     );
   };
@@ -50,16 +50,16 @@ const TransactionHistory = ({ topups }: TransactionHistoryProps) => {
           </div>
         </div>
 
-        {/* Status Filter */}
+        {/* Status Filter - ✅ Updated to match backend values */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
         >
           <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
+          <option value="Pending">Pending</option>
+          <option value="Success">Approved</option>
+          <option value="Failed">Rejected</option>
         </select>
       </div>
 
@@ -73,7 +73,6 @@ const TransactionHistory = ({ topups }: TransactionHistoryProps) => {
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Month</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
                 <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Updated</th>
               </tr>
             </thead>
             <tbody>
@@ -83,7 +82,12 @@ const TransactionHistory = ({ topups }: TransactionHistoryProps) => {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-900">
-                        {new Date(topup.created_at).toLocaleDateString()}
+                        {/* ✅ FIXED: Changed from topup.created_at to topup.date */}
+                        {new Date(topup.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </span>
                     </div>
                   </td>
@@ -102,11 +106,6 @@ const TransactionHistory = ({ topups }: TransactionHistoryProps) => {
                   </td>
                   <td className="py-4 px-4 text-center">
                     {getStatusBadge(topup.status)}
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-xs text-gray-500">
-                      {new Date(topup.updated_at).toLocaleDateString()}
-                    </span>
                   </td>
                 </tr>
               ))}

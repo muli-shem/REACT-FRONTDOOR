@@ -41,13 +41,26 @@ const Dashboard = () => {
 
   const nextEvent = events
     .filter(event => {
-      if (!event.event_date) return false;
-      const eventDate = new Date(event.event_date);
-      return !isNaN(eventDate.getTime()) && eventDate >= today;
+      // Ensure event and event_date exist
+      if (!event || !event.event_date) return false;
+      
+      try {
+        const eventDate = new Date(event.event_date);
+        // Check if date is valid and is in the future
+        return !isNaN(eventDate.getTime()) && eventDate >= today;
+      } catch (error) {
+        // Skip events with invalid dates
+        console.warn('Invalid event date:', event.event_date);
+        return false;
+      }
     })
-    .sort((a, b) => 
-      new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
-    )[0];
+    .sort((a, b) => {
+      try {
+        return new Date(a.event_date).getTime() - new Date(b.event_date).getTime();
+      } catch (error) {
+        return 0;
+      }
+    })[0];
 
   return (
     <div className="space-y-6">
@@ -132,19 +145,30 @@ const Dashboard = () => {
               <p className="mb-6 opacity-90">{nextEvent.description || 'No description available'}</p>
               
               <div className="space-y-3 mb-6">
-                {nextEvent.event_date && (
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5" />
-                    <span className="font-semibold">
-                      {new Date(nextEvent.event_date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                )}
+                {nextEvent.event_date && (() => {
+                  try {
+                    const eventDate = new Date(nextEvent.event_date);
+                    if (!isNaN(eventDate.getTime())) {
+                      return (
+                        <div className="flex items-center gap-3">
+                          <Calendar className="w-5 h-5" />
+                          <span className="font-semibold">
+                            {eventDate.toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error formatting date:', error);
+                  }
+                  return null;
+                })()}
+                
                 {nextEvent.event_time && (
                   <div className="flex items-center gap-3">
                     <Clock className="w-5 h-5" />

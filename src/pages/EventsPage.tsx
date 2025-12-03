@@ -11,25 +11,59 @@ const EventsPage = () => {
     dispatch(fetchEvents());
   }, [dispatch]);
 
-  // Separate upcoming and past events
+  // Separate upcoming and past events with safe date handling
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset to start of day
 
-  const upcomingEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date);
-    eventDate.setHours(0, 0, 0, 0);
-    return eventDate >= today;
-  }).sort((a, b) => 
-    new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
-  );
+  const upcomingEvents = events
+    .filter(event => {
+      // Validate event and date exist
+      if (!event || !event.event_date) return false;
+      
+      try {
+        const eventDate = new Date(event.event_date);
+        // Check if date is valid
+        if (isNaN(eventDate.getTime())) return false;
+        
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate >= today;
+      } catch (error) {
+        console.warn('Invalid event date for event:', event.id);
+        return false;
+      }
+    })
+    .sort((a, b) => {
+      try {
+        return new Date(a.event_date).getTime() - new Date(b.event_date).getTime();
+      } catch (error) {
+        return 0;
+      }
+    });
 
-  const pastEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date);
-    eventDate.setHours(0, 0, 0, 0);
-    return eventDate < today;
-  }).sort((a, b) => 
-    new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
-  );
+  const pastEvents = events
+    .filter(event => {
+      // Validate event and date exist
+      if (!event || !event.event_date) return false;
+      
+      try {
+        const eventDate = new Date(event.event_date);
+        // Check if date is valid
+        if (isNaN(eventDate.getTime())) return false;
+        
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate < today;
+      } catch (error) {
+        console.warn('Invalid event date for event:', event.id);
+        return false;
+      }
+    })
+    .sort((a, b) => {
+      try {
+        return new Date(b.event_date).getTime() - new Date(a.event_date).getTime();
+      } catch (error) {
+        return 0;
+      }
+    });
 
   if (loading) {
     return (
@@ -61,16 +95,27 @@ const EventsPage = () => {
   }
 
   const EventCard = ({ event, isPast = false }: { event: any; isPast?: boolean }) => {
-    // Safely parse the date
-    const eventDate = event.event_date ? new Date(event.event_date) : new Date();
-    const isValidDate = !isNaN(eventDate.getTime());
-    const isToday = isValidDate && eventDate.toDateString() === today.toDateString();
-
-    // If date is invalid, don't render the card
-    if (!isValidDate) {
-      console.error('Invalid event date:', event);
+    // Validate event_date exists
+    if (!event.event_date) {
+      console.error('Event missing date:', event);
       return null;
     }
+
+    // Safely parse the date
+    let eventDate: Date;
+    try {
+      eventDate = new Date(event.event_date);
+      // Validate date is valid
+      if (isNaN(eventDate.getTime())) {
+        console.error('Invalid event date:', event.event_date);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error parsing event date:', error);
+      return null;
+    }
+
+    const isToday = eventDate.toDateString() === today.toDateString();
 
     return (
       <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition ${

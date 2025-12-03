@@ -151,6 +151,7 @@ export interface OrgState {
   announcements: Announcement[];
   events: Event[];
   loading: boolean;
+  nextEvent: Event | null;
   error: string | null;
 }
 

@@ -6,6 +6,7 @@ import { type OrgState, type Announcement, type Event } from '@/types';
 const initialState: OrgState = {
   announcements: [],
   events: [],
+  nextEvent: null, // Add dedicated field for next event
   loading: false,
   error: null,
 };
@@ -92,6 +93,7 @@ const orgSlice = createSlice({
     clearOrgData: (state) => {
       state.announcements = [];
       state.events = [];
+      state.nextEvent = null;
     },
   },
   extraReducers: (builder) => {
@@ -134,14 +136,16 @@ const orgSlice = createSlice({
     });
     builder.addCase(fetchNextEvent.fulfilled, (state, action) => {
       state.loading = false;
-      // If we got a valid event (not null), add it to the events array
+      // Store next event in dedicated field instead of mixing with events array
+      state.nextEvent = action.payload;
+      
+      // Optionally add to events array only if it's a valid event
       if (action.payload) {
         const exists = state.events.some(e => e.id === action.payload!.id);
         if (!exists) {
           state.events = [action.payload, ...state.events];
         }
       }
-      // If payload is null, it means no upcoming events - this is fine, not an error
     });
     builder.addCase(fetchNextEvent.rejected, (state, action) => {
       state.loading = false;

@@ -41,28 +41,28 @@ const FinancePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Total MMF Savings"
-            value={`KES ${summary.total_savings.toLocaleString()}`}
+            value={`KES ${(summary.total_savings ?? 0).toLocaleString()}`}
             icon={DollarSign}
             iconColor="text-secondary"
             iconBgColor="bg-secondary/10"
           />
           <StatCard
             title="Monthly Contributions"
-            value={`KES ${summary.monthly_contributions.toLocaleString()}`}
+            value={`KES ${(summary.monthly_contributions ?? 0).toLocaleString()}`}
             icon={TrendingUp}
             iconColor="text-green-600"
             iconBgColor="bg-green-100"
           />
           <StatCard
             title="Members Contributed"
-            value={summary.total_members_contributed}
+            value={summary.total_members_contributed ?? 0}
             icon={Users}
             iconColor="text-blue-600"
             iconBgColor="bg-blue-100"
           />
           <StatCard
             title="Pending Approvals"
-            value={summary.pending_approvals}
+            value={summary.pending_approvals ?? 0}
             icon={AlertCircle}
             iconColor="text-yellow-600"
             iconBgColor="bg-yellow-100"
@@ -84,19 +84,20 @@ const FinancePage = () => {
             
             <div className="flex items-end justify-between gap-2 h-64">
               {summary.monthly_breakdown.map((month, idx) => {
-                const maxTotal = Math.max(...summary.monthly_breakdown.map(m => m.total));
-                const heightPercent = (month.total / maxTotal) * 100;
+                const total = month.total ?? 0;
+                const maxTotal = Math.max(...summary.monthly_breakdown!.map(m => m.total ?? 0));
+                const heightPercent = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
 
                 return (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-2">
                     <div className="w-full flex flex-col items-center justify-end" style={{ height: '200px' }}>
                       <div className="text-xs font-bold text-primary mb-1">
-                        {(month.total / 1000).toFixed(0)}K
+                        {(total / 1000).toFixed(0)}K
                       </div>
                       <div
                         className="w-full bg-gradient-to-t from-primary to-primary-light rounded-t-lg transition-all hover:from-secondary hover:to-secondary-light cursor-pointer"
                         style={{ height: `${heightPercent}%`, minHeight: '20px' }}
-                        title={`KES ${month.total.toLocaleString()}`}
+                        title={`KES ${total.toLocaleString()}`}
                       ></div>
                     </div>
                     <span className="text-xs text-gray-600 font-medium">

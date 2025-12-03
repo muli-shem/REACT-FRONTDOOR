@@ -51,16 +51,16 @@ export interface MembersState {
   totalCount: number;
 }
 
-// Finance Types
+/// Finance Types
 export interface TopUp {
   id: number;
-  member: number;
-  member_name: string;
-  amount: number;
-  month: string;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  updated_at: string;
+  user: User;              // ✅ Backend returns full user object
+  amount: number;          // ✅ Now number (after FloatField fix)
+  month: string;           // ✅ DateField as string
+  date: string;            // ✅ Backend returns "date", not "created_at"
+  status: 'Pending' | 'Success' | 'Failed';  // ✅ Match backend STATUS_CHOICES
+  transaction_id: string;
+  notes: string;
 }
 
 export interface FinanceSummary {
@@ -68,7 +68,7 @@ export interface FinanceSummary {
   monthly_contributions: number;
   total_members_contributed: number;
   pending_approvals: number;
-  monthly_breakdown: {
+  monthly_breakdown?: {
     month: string;
     total: number;
   }[];

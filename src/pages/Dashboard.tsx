@@ -86,21 +86,21 @@ const Dashboard = () => {
         />
         <StatCard
           title="Total MMF Savings"
-          value={financeSummary ? `KES ${financeSummary.total_savings.toLocaleString()}` : 'KES 0'}
+          value={`KES ${(financeSummary?.total_savings ?? 0).toLocaleString()}`}
           icon={DollarSign}
           iconColor="text-secondary"
           iconBgColor="bg-secondary/10"
         />
         <StatCard
           title="Monthly Contributions"
-          value={financeSummary ? `KES ${financeSummary.monthly_contributions.toLocaleString()}` : 'KES 0'}
+          value={`KES ${(financeSummary?.monthly_contributions ?? 0).toLocaleString()}`}
           icon={TrendingUp}
           iconColor="text-green-600"
           iconBgColor="bg-green-100"
         />
         <StatCard
           title="Pending Approvals"
-          value={financeSummary?.pending_approvals || 0}
+          value={financeSummary?.pending_approvals ?? 0}
           icon={AlertCircle}
           iconColor="text-yellow-600"
           iconBgColor="bg-yellow-100"
@@ -289,21 +289,24 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold text-gray-900 mb-6">Monthly Contributions</h2>
           
           <div className="grid md:grid-cols-6 gap-4">
-            {financeSummary.monthly_breakdown.map((month, idx) => (
-              <div key={idx} className="text-center">
-                <p className="text-xs text-gray-600 mb-2">{month.month}</p>
-                <div 
-                  className="bg-primary/10 rounded-lg p-3"
-                  style={{
-                    height: `${Math.min((month.total / 50000) * 100, 100)}px`
-                  }}
-                >
-                  <p className="text-sm font-bold text-primary">
-                    {(month.total / 1000).toFixed(0)}K
-                  </p>
+            {financeSummary.monthly_breakdown.map((month, idx) => {
+              const total = month.total ?? 0;
+              return (
+                <div key={idx} className="text-center">
+                  <p className="text-xs text-gray-600 mb-2">{month.month}</p>
+                  <div 
+                    className="bg-primary/10 rounded-lg p-3"
+                    style={{
+                      height: `${Math.min((total / 50000) * 100, 100)}px`
+                    }}
+                  >
+                    <p className="text-sm font-bold text-primary">
+                      {(total / 1000).toFixed(0)}K
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

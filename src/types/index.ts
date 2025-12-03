@@ -125,6 +125,7 @@ export interface CreateIdeaData {
 }
 
 // Organization Types
+// Organization Types
 export interface Announcement {
   id: number;
   title: string;
@@ -139,12 +140,14 @@ export interface Event {
   id: number;
   title: string;
   description: string;
-  location: string;
-  event_date: string;
-  event_time: string;
-  created_by: string;
+  venue: string;           // ✅ Changed from "location" to "venue"
+  date: string;            // ✅ Changed from "event_date" to "date"
+  image?: string | null;   // ✅ Added image field
+  link?: string;           // ✅ Added link field
   created_at: string;
-  
+  // Remove these if they don't exist in API:
+  // event_time: string;
+  // created_by: string;
 }
 
 export interface OrgState {
@@ -154,7 +157,6 @@ export interface OrgState {
   nextEvent: Event | null;
   error: string | null;
 }
-
 // Join Application Types
 export interface JoinApplicationData {
   firstName: string;

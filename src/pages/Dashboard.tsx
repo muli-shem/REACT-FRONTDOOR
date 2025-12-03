@@ -17,7 +17,8 @@ import {
   MapPin,
   ArrowRight,
   Lightbulb,
-  FileText
+  FileText,
+  Link as LinkIcon
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -41,22 +42,22 @@ const Dashboard = () => {
 
   const nextEvent = events
     .filter(event => {
-      // Ensure event and event_date exist
-      if (!event || !event.event_date) return false;
+      // Ensure event and date exist
+      if (!event || !event.date) return false;
       
       try {
-        const eventDate = new Date(event.event_date);
+        const eventDate = new Date(event.date);
         // Check if date is valid and is in the future
         return !isNaN(eventDate.getTime()) && eventDate >= today;
       } catch (error) {
         // Skip events with invalid dates
-        console.warn('Invalid event date:', event.event_date);
+        console.warn('Invalid event date:', event.date);
         return false;
       }
     })
     .sort((a, b) => {
       try {
-        return new Date(a.event_date).getTime() - new Date(b.event_date).getTime();
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
       } catch (error) {
         return 0;
       }
@@ -145,9 +146,9 @@ const Dashboard = () => {
               <p className="mb-6 opacity-90">{nextEvent.description || 'No description available'}</p>
               
               <div className="space-y-3 mb-6">
-                {nextEvent.event_date && (() => {
+                {nextEvent.date && (() => {
                   try {
-                    const eventDate = new Date(nextEvent.event_date);
+                    const eventDate = new Date(nextEvent.date);
                     if (!isNaN(eventDate.getTime())) {
                       return (
                         <div className="flex items-center gap-3">
@@ -169,16 +170,46 @@ const Dashboard = () => {
                   return null;
                 })()}
                 
-                {nextEvent.event_time && (
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5" />
-                    <span className="font-semibold">{nextEvent.event_time}</span>
-                  </div>
-                )}
-                {nextEvent.location && (
+                {nextEvent.date && (() => {
+                  try {
+                    const eventDate = new Date(nextEvent.date);
+                    if (!isNaN(eventDate.getTime())) {
+                      return (
+                        <div className="flex items-center gap-3">
+                          <Clock className="w-5 h-5" />
+                          <span className="font-semibold">
+                            {eventDate.toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error formatting time:', error);
+                  }
+                  return null;
+                })()}
+                
+                {nextEvent.venue && (
                   <div className="flex items-center gap-3">
                     <MapPin className="w-5 h-5" />
-                    <span className="font-semibold">{nextEvent.location}</span>
+                    <span className="font-semibold">{nextEvent.venue}</span>
+                  </div>
+                )}
+                
+                {nextEvent.link && (
+                  <div className="flex items-center gap-3">
+                    <LinkIcon className="w-5 h-5" />
+                    <a 
+                      href={nextEvent.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="font-semibold hover:underline"
+                    >
+                      Join Event
+                    </a>
                   </div>
                 )}
               </div>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { fetchEvents } from '@/redux/slices/orgSlice';
-import { Calendar, Clock, MapPin, User, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, AlertCircle, Link as LinkIcon, Image } from 'lucide-react';
 
 const EventsPage = () => {
   const dispatch = useAppDispatch();
@@ -13,16 +13,14 @@ const EventsPage = () => {
 
   // Separate upcoming and past events with safe date handling
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset to start of day
+  today.setHours(0, 0, 0, 0);
 
   const upcomingEvents = events
     .filter(event => {
-      // Validate event and date exist
-      if (!event || !event.event_date) return false;
+      if (!event || !event.date) return false;
       
       try {
-        const eventDate = new Date(event.event_date);
-        // Check if date is valid
+        const eventDate = new Date(event.date);
         if (isNaN(eventDate.getTime())) return false;
         
         eventDate.setHours(0, 0, 0, 0);
@@ -34,7 +32,7 @@ const EventsPage = () => {
     })
     .sort((a, b) => {
       try {
-        return new Date(a.event_date).getTime() - new Date(b.event_date).getTime();
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
       } catch (error) {
         return 0;
       }
@@ -42,12 +40,10 @@ const EventsPage = () => {
 
   const pastEvents = events
     .filter(event => {
-      // Validate event and date exist
-      if (!event || !event.event_date) return false;
+      if (!event || !event.date) return false;
       
       try {
-        const eventDate = new Date(event.event_date);
-        // Check if date is valid
+        const eventDate = new Date(event.date);
         if (isNaN(eventDate.getTime())) return false;
         
         eventDate.setHours(0, 0, 0, 0);
@@ -59,7 +55,7 @@ const EventsPage = () => {
     })
     .sort((a, b) => {
       try {
-        return new Date(b.event_date).getTime() - new Date(a.event_date).getTime();
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
       } catch (error) {
         return 0;
       }
@@ -95,19 +91,16 @@ const EventsPage = () => {
   }
 
   const EventCard = ({ event, isPast = false }: { event: any; isPast?: boolean }) => {
-    // Validate event_date exists
-    if (!event.event_date) {
+    if (!event.date) {
       console.error('Event missing date:', event);
       return null;
     }
 
-    // Safely parse the date
     let eventDate: Date;
     try {
-      eventDate = new Date(event.event_date);
-      // Validate date is valid
+      eventDate = new Date(event.date);
       if (isNaN(eventDate.getTime())) {
-        console.error('Invalid event date:', event.event_date);
+        console.error('Invalid event date:', event.date);
         return null;
       }
     } catch (error) {
@@ -121,6 +114,21 @@ const EventsPage = () => {
       <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition ${
         isPast ? 'opacity-75' : ''
       }`}>
+        {/* Event Image (if available) */}
+        {event.image ? (
+          <div className="mb-4 rounded-lg overflow-hidden">
+            <img 
+              src={event.image} 
+              alt={event.title}
+              className="w-full h-48 object-cover"
+            />
+          </div>
+        ) : (
+          <div className="mb-4 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center h-48">
+            <Image className="w-16 h-16 text-gray-400" />
+          </div>
+        )}
+
         {/* Date Badge */}
         <div className="flex items-start gap-6 mb-4">
           <div className={`flex-shrink-0 w-16 h-16 rounded-lg flex flex-col items-center justify-center ${
@@ -169,22 +177,35 @@ const EventsPage = () => {
                   })}
                 </span>
               </div>
-              {event.event_time && (
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <Clock className="w-4 h-4" />
-                  <span className="font-semibold">{event.event_time}</span>
-                </div>
-              )}
-              {event.location && (
+              
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span className="font-semibold">
+                  {eventDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+              
+              {event.venue && (
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <MapPin className="w-4 h-4" />
-                  <span className="font-semibold">{event.location}</span>
+                  <span className="font-semibold">{event.venue}</span>
                 </div>
               )}
-              {event.created_by && (
+              
+              {event.link && (
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <User className="w-4 h-4" />
-                  <span>Organized by {event.created_by}</span>
+                  <LinkIcon className="w-4 h-4" />
+                  <a 
+                    href={event.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Join Event Link
+                  </a>
                 </div>
               )}
             </div>

@@ -16,8 +16,18 @@ export const fetchMembers = createAsyncThunk<Member[]>(
   'members/fetchMembers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/members/');
-      return response.data;
+      const response = await api.get('/members/profiles/');
+      // Transform the API response to match our Member type
+      const transformedData = response.data.map((member: any) => ({
+        ...member,
+        // Convert skills from comma-separated string to array
+        skills: typeof member.skills === 'string'
+          ? member.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
+          : [],
+        // Map created_at to joined_date
+        joined_date: member.created_at,
+      }));
+      return transformedData;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch members'
@@ -31,8 +41,16 @@ export const fetchMemberById = createAsyncThunk<Member, number>(
   'members/fetchMemberById',
   async (memberId, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/members/${memberId}/`);
-      return response.data;
+      const response = await api.get(`/members/profiles/${memberId}/`);
+      const member = response.data;
+      // Transform the single member
+      return {
+        ...member,
+        skills: typeof member.skills === 'string'
+          ? member.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
+          : [],
+        joined_date: member.created_at,
+      };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch member'
@@ -57,7 +75,7 @@ export const fetchMemberCount = createAsyncThunk<number>(
 );
 
 // Async thunk to submit join application
-export const submitJoinApplication = createAsyncThunk <
+export const submitJoinApplication = createAsyncThunk<
   { detail: string; user?: any },
   JoinApplicationData
 >(

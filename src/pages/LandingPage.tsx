@@ -73,7 +73,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-primary">G-NET</h1>
-            <p className="text-xs text-gray-600">Youth Network</p>
+            <p className="text-xs text-gray-600">Generational Entreprenuers Network</p>
           </div>
           <div className="flex items-center gap-4">
             <Link
@@ -108,7 +108,7 @@ const LandingPage: React.FC = () => {
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               Empowering Minds,<br />
-              <span className="text-secondary">Empowering Generations</span>
+              <span className="text-secondary">Transforming Generations</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto">
@@ -464,7 +464,7 @@ const LandingPage: React.FC = () => {
       <footer className="bg-primary-dark text-white py-12 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h3 className="text-2xl font-bold mb-2">G-NET</h3>
-          <p className="text-gray-300 mb-6">Empowering Minds, Empowering Generations</p>
+          <p className="text-gray-300 mb-6">Empowering Minds, Transforming Generations</p>
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} G-NET. All rights reserved.
           </p>

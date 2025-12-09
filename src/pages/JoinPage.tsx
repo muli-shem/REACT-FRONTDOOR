@@ -92,7 +92,7 @@ const JoinPage = () => {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-primary">G-NET</h1>
-            <p className="text-xs text-gray-600">Youth Network</p>
+            <p className="text-xs text-gray-600">Transforming Network</p>
           </div>
         </div>
       </div>
@@ -110,7 +110,7 @@ const JoinPage = () => {
             Become a G-NET Member
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Empowering Minds, Empowering Generations
+            Empowering Minds, Transforming Generations
           </p>
         </div>
 

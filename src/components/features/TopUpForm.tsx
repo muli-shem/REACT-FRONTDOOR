@@ -10,7 +10,9 @@ const TopUpForm = () => {
 
   const [formData, setFormData] = useState({
     amount: '',
-    month: ''
+    month: '',
+    transaction_id: '',
+    notes: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,9 +30,16 @@ const TopUpForm = () => {
       return;
     }
 
+    if (!formData.transaction_id.trim()) {
+      toast.error('Please enter a transaction ID');
+      return;
+    }
+
     const result = await dispatch(createTopUp({
       amount,
-      month: formData.month
+      month: formData.month,
+      transaction_id: formData.transaction_id,
+      notes: formData.notes || undefined // Only include if not empty
     }));
 
     if (createTopUp.fulfilled.match(result)) {
@@ -38,7 +47,9 @@ const TopUpForm = () => {
       // Reset form
       setFormData({
         amount: '',
-        month: ''
+        month: '',
+        transaction_id: '',
+        notes: ''
       });
     } else {
       toast.error('Failed to submit top-up. Please try again.');
@@ -122,6 +133,42 @@ const TopUpForm = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Transaction ID */}
+        <div>
+          <label htmlFor="transaction_id" className="block text-sm font-semibold text-gray-700 mb-2">
+            Transaction ID *
+          </label>
+          <input
+            type="text"
+            id="transaction_id"
+            name="transaction_id"
+            value={formData.transaction_id}
+            onChange={(e) => setFormData({ ...formData, transaction_id: e.target.value })}
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+            placeholder="e.g., THMSBHDJ233SHEM"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Enter the M-Pesa or bank transaction reference number
+          </p>
+        </div>
+
+        {/* Notes (Optional) */}
+        <div>
+          <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-2">
+            Notes (Optional)
+          </label>
+          <textarea
+            id="notes"
+            name="notes"
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            rows={3}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition resize-none"
+            placeholder="Add any additional information about this transaction..."
+          />
         </div>
 
         {/* Info Box */}

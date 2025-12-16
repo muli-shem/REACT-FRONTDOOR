@@ -84,6 +84,8 @@ export interface FinanceState {
 export interface CreateTopUpData {
   amount: number;
   month: string;
+  transaction_id: string;
+  notes?: string;
 }
 
 // Projects Types (Blessed Mind)

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { createTopUp } from '@/redux/slices/financesSlice';
 import toast from 'react-hot-toast';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Calendar } from 'lucide-react';
 
 const TopUpForm = () => {
   const dispatch = useAppDispatch();
@@ -26,7 +26,7 @@ const TopUpForm = () => {
     }
 
     if (!formData.month) {
-      toast.error('Please select a month');
+      toast.error('Please select a date');
       return;
     }
 
@@ -37,9 +37,9 @@ const TopUpForm = () => {
 
     const result = await dispatch(createTopUp({
       amount,
-      month: formData.month,
+      month: formData.month, // Already in YYYY-MM-DD format from date input
       transaction_id: formData.transaction_id,
-      notes: formData.notes || undefined // Only include if not empty
+      notes: formData.notes || undefined
     }));
 
     if (createTopUp.fulfilled.match(result)) {
@@ -56,22 +56,13 @@ const TopUpForm = () => {
     }
   };
 
-  // Generate month options (current month and previous 6 months)
-  const getMonthOptions = () => {
-    const options = [];
-    const today = new Date();
-    
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const value = date.toISOString().slice(0, 7); // "2024-11"
-      const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      options.push({ value, label });
-    }
-    
-    return options;
-  };
-
-  const monthOptions = getMonthOptions();
+  // Get today's date in YYYY-MM-DD format for max attribute
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Get date 6 months ago for min attribute
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const minDate = sixMonthsAgo.toISOString().split('T')[0];
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -113,26 +104,28 @@ const TopUpForm = () => {
           </p>
         </div>
 
-        {/* Month */}
+        {/* Date Picker */}
         <div>
           <label htmlFor="month" className="block text-sm font-semibold text-gray-700 mb-2">
-            Contribution Month *
+            Contribution Date *
           </label>
-          <select
-            id="month"
-            name="month"
-            value={formData.month}
-            onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition bg-white"
-          >
-            <option value="">Select month</option>
-            {monthOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+            <input
+              type="date"
+              id="month"
+              name="month"
+              value={formData.month}
+              onChange={(e) => setFormData({ ...formData, month: e.target.value })}
+              required
+              min={minDate}
+              max={today}
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Select the date for this contribution (within last 6 months)
+          </p>
         </div>
 
         {/* Transaction ID */}
